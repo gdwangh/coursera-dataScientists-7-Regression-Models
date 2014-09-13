@@ -39,3 +39,8 @@ e2<-resid(fit2)
 sum(e1^2)/sum(e2^2)
 or
 deviance(fit)/deviance(fit2)
+
+plot(mpg~wt, data=mtcars,xlim=range(0,mtcars$wt), ylim=range(0,mtcars$mpg))
+abline(lm(mpg~wt, data=mtcars),col="blue")  # with the intercept and slope
+abline(lm(mpg~1, data=mtcars),col="red")  # just an intercept
+abline(lm(mpg~wt-1, data=mtcars),col="green")  # remove an intercept, just slop
