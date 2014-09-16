@@ -1,0 +1,32 @@
+---
+title: "Is an automatic or manual transmission better for MPG"
+author: "wangh"
+date: "Saturday, September 13, 2014"
+output: html_document
+---
+
+This is an document to answer 2 questions below using regression models and exploratory data analyses: 
+- Is an automatic or manual transmission better for MPG
+- Quantify the MPG difference between automatic and manual transmissions
+
+mtcars data set is taken, and the variables is decribed in help:
+[, 1]   mpg	 Miles/(US) gallon
+...
+[, 9]   am	 Transmission (0 = automatic, 1 = manual)
+
+```{r}
+library(datasets)
+data(mtcars)
+boxplot(mpg~am, data=mtcars)
+fit<-lm(mpg~factor(am),data=mtcars)
+summary(fit)
+```
+
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
