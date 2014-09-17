@@ -6,27 +6,66 @@ output: html_document
 ---
 
 This is an document to answer 2 questions below using regression models and exploratory data analyses: 
-- Is an automatic or manual transmission better for MPG
-- Quantify the MPG difference between automatic and manual transmissions
 
-mtcars data set is taken, and the variables is decribed in help:
-[, 1]   mpg	 Miles/(US) gallon
-...
-[, 9]   am	 Transmission (0 = automatic, 1 = manual)
+1. Is an automatic or manual transmission better for MPG
+2. Quantify the MPG difference between automatic and manual transmissions
 
-```{r}
+The mtcars data set is taken, and the variable "am" is for the Transmission (0 = automatic, 1 = manual)
+```{r, fig.width=4}
 library(datasets)
 data(mtcars)
-boxplot(mpg~am, data=mtcars)
-fit<-lm(mpg~factor(am),data=mtcars)
+dim(mtcars)
+head(mtcars)
+boxplot(mpg~am, data=mtcars, xlab="am(0 = automatic, 1 = manual)", ylab="mpg(Miles/(US) gallon")
+```
+As Fig-2 in Appendix, miles per gallon for manual Transmission is higher than automatic Transmissions
+, so it seems manual transmission is better for MPG.
+
+Fig-3 in Appendix shows the cor between mpg and other variables. It seems every variables as not week relationship with mpg.
+```{r}
+cor(mtcars$mpg,mtcars[2:11])
+```
+
+fit model with all variables:
+```{r}
+mtcars$am<-factor(mtcars$am)
+fitn<-lm(mpg~.,data=mtcars)
+summary(fitn)
+```
+Fig-4 in Appendix shows the coefficients. For am is a two level factor, am==0 is reference. coefficients show, the Intercept Estimatesv is the mean of the referenct group and and the other Estimates are the distances of the other groups' means from the reference mean. So, we expect increase `r round(summary(fit)$coefficients[9],4)`(E(am==1)) in mpg, when am change from 0 to 1, holding all the other variables constant.
+
+fit model with varable am only:
+```{r}
+fit<-update(fitn,mpg~am)
 summary(fit)
 ```
+In fig-5 in Appendix coefficients part, for am is a two level factor, am==0 is reference. coefficients show we expect increase `r summary(fit)$coefficients[2]`(E(am==1)) in mpg, when variable am change from 0 to 1, , holding all the other variables constant.
+
+c(coef(lm(mpg ~ am, mtcars))[2], 
+  coef(lm(mpg ~ am + cyl,mtcars))[2],
+  coef(lm(mpg ~ am + cyl + Education,mtcars))[2],
+  coef(lm(mpg ~ am + cyl + Education + Examination,mtcars))[2],
+  coef(lm(mpg ~ am + cyl + Education + Examination +Infant.Mortality, mtcars))[2])
 
 
-You can also embed plots, for example:
-
-```{r, echo=FALSE}
-plot(cars)
+Analyse variance (or deviance) tables for upper 2 fitted model is below and result is fig-6 in Appendix.
+```{r}
+anova(fit,fitn)
 ```
+And as the Fig-6,  
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Appendix 
+Fig-1: summary of mtcars
+
+Fig-2: miles per gallon for different Transmission plot
+
+Fig-3: Cor between mpg and other variables in mtcars
+
+Fig-4: summary of fitn, fitted model with all variable
+
+Fig-5: summary of fitn, fitted model with variable am only
+
+Fig-6: analysis of variance (or deviance) tables for 2 fitted model.
+
+Fig-7: residuals versus fitted values plot 
+plot(fit, which=1)
