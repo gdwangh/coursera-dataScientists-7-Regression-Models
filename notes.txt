@@ -60,3 +60,31 @@ Cook's distance: It is essentially the sum of squared differences between values
    = cooks.distance(fit)[1]
   
    对应的图：plot(fit, which=5)
+
+
+A variance inflation factor (VIF) is a ratio of estimated variances, the variance due to including the ith regressor, divided by that due to including a corresponding ideal
+ regressor which is uncorrelated with the others. VIF's show, for each regression coefficient, the variance inflation due to including all the others.
+VIF 可用于衡量fit中的各变量相比基准的相关程度，可以从全部变量的fit开始，计算变量的VIF，删除最大的那个变量，得到新的fit. 如果发现某个变量并未由于本次动作见效VIF值，说明这个变量与减小的变量不相关。反复这个过程，直到剩余的变量都不相关。
+  mdl<-lm(Fertility~., data=swiss)
+  vif(mdl)
+
+VIF is the square of standard error inflation
+If a regressor is strongly correlated with others, hence will increase their VIF's, why
+shouldn't we just exclude it? --- Excluding it might bias coefficient estimates of regressors with which it is correlated.
+
+The problems of variance inflation and bias due to excluded regressors both involve correlated regressors. However there are methods, such as factor analysis or principal componenent analysis, which can convert regressors to an equivalent uncorrelated set.Why then, when modeling, should we not just use uncorrelated regressors and avoid all the trouble? -- Using converted regressors may make interpretation difficult
+
+
+
+Omitting a regressor can bias estimation of the coefficient of certain other regressors.Which ones?
+---  Correlated regressors
+
+Including more regressors will reduce a model's residual sum of squares, even if the new regressors are irrelevant. True or False?
+--- True
+
+When adding regressors, the reduction in residual sums of squares should be tested for
+significance above and beyond that of reducing residual degrees of freedom. R's anova()
+function uses an F-test for this purpose. What else should be done to insure that anova() applies?
+--- Model residuals should be tested for normality
+     shapiro.test(fit3$residuals)
+
