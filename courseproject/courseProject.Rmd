@@ -19,27 +19,42 @@ boxplot(mpg~am, data=mtcars, xlab="am(0 = automatic, 1 = manual)", ylab="mpg(Mil
 ```
 As Fig-2 in Appendix, mean of miles per gallon for manual Transmission is higher than that of automatic Transmissions.
 
-fit model with all variables and with only am variable:
+check fit models with different variables:
 ```{r}
 mtcars$am<-factor(mtcars$am)
-fit1<-lm(mpg~am, data=mtcars)
-fitn<-lm(mpg~., data=mtcars)
-anova(fit1,fitn)
+fit1<-lm(mpg ~ am, data=mtcars)
+fit2<-lm(mpg ~ gear + am, data=mtcars)
+fit3<-lm(mpg ~ gear + am + drat, data=mtcars)
+fit4<-lm(mpg ~ drat + vs + am + gear, data=mtcars)
+fit9<-lm(mpg ~ disp + hp + drat + wt + qsec + vs + am + gear + carb, data=mtcars)
+fit10<-lm(mpg ~ cyl + disp + hp + drat + wt + qsec + vs + am + gear + carb, data=mtcars)
+anova(fit1,fit2,fit3,fit4,fit9,fit10)
 ```
-result of anova() is Fig-6 in appendix. For Pr(>F) is in level 0.001, it fails to reject the variables adding. So model with all variables fitn is selected
+As result of anova() in appendix Fig-6, Pr(>F) is less than 0.05 except fitn, so it fails to reject the variables adding in model1 to model 5 and adding variable in fitn is rejects for Pr(>F). 
 
-```{r}
-summary(fitn)
+Calling plot in Appendix fig7 to checking whether there is outlier.
+```{r,fig.height=7}
+ par(mfrow = c(3, 2))
+ plot(fit9, which=1)
+ plot(fit9, which=2)
+ plot(fit9, which=3)
+ plot(fit9, which=4)
+ plot(fit9, which=5)
+ plot(predict(fit9), resid(fit9))
 ```
-Fig-4 in Appendix shows the coefficients. For am is a two level factor, am==0 is reference, and the Intercept Estimatesv is the mean of the referenct group am==0 and the other Estimates are the distances of the other groups' means from the reference mean, i.e we expect increase `r round(summary(fitn)$coefficients[9],4)`(E(am==1)) in mpg, when am change from 0 to 1, holding all the other variables constant.
+
+So, we select model fit9.
 ```{r}
-par(mfrow = c(2, 2))
- plot(fitn, which=1)
- plot(fitn, which=2)
- plot(fitn, which=3)
- plot(fitn, which=4)
- plot(fitn, which=5)
+fit<-fit9
+summary(fit)
 ```
+Fig-4 in Appendix shows the coefficients. 
+1. For am is a two level factor, am==0 is reference, and the Intercept Estimatesv is the mean of the referenct group am==0 and the other Estimates are the distances of the other groups' means from the reference mean, i.e we expect increase `r round(summary(fit)$coefficients[8],4)`(E(am==1)) in mpg, when am change from 0 to 1, holding all the other variables constant. 
+2. Tests are tests of whether the groups are different than zero. i.e. H0: E(am==1)==0 vs. Ha: E(am==1)<>0 
+
+T-test: H0: E(am==1)==`r round(summary(fit)$coefficients[8],4)` VS Ha: E(am==1)<>0
+```{r}
+pt(-abs(summary(fit)$coefficients[8,3]), fit$df, lower.tail = FALSE)
 
 ### Appendix 
 Fig-1: summary of mtcars
