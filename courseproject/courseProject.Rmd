@@ -4,70 +4,89 @@ author: "wangh"
 date: "Saturday, September 13, 2014"
 output: html_document
 ---
-
-This is an document to answer 2 questions below using regression models and exploratory data analyses: 
+### Synopsis
+In This document mtcars dataset is taken to answer 2 questions below, using regression models and exploratory data analyses: 
 
 1. Is an automatic or manual transmission better for MPG
 2. Quantify the MPG difference between automatic and manual transmissions
 
-The mtcars data set is taken, and the variable "am" is for the Transmission (0 = automatic, 1 = manual)
-```{r, fig.width=4}
+### Data Processing
+
+From the help ?mtcars, and the variable am is for the Transmission (0 = automatic, 1 = manual). 
+```{r}
 library(datasets);library(car)
 data(mtcars)
-head(mtcars)
-boxplot(mpg~am, data=mtcars, xlab="am(0 = automatic, 1 = manual)", ylab="mpg(Miles/(US) gallon")
+str(mtcars)
 ```
-As Fig-2 in Appendix, mean of miles per gallon for manual Transmission is higher than that of automatic Transmissions.
+Plots for mpg~am  in appendix fig-1 show the mean of miles per gallon for manual Transmission is higher than mean of automatic, but when consider other variables, the higher is not constant.
 
-check fit models with different variables:
+Calculate the cor() between mpg and other variables. 
+```{r}
+cor(mtcars$mpg, mtcars[c(2:11)])
+cor(as.numeric(mtcars$am), mtcars[c(2:8,10:11)])
+```
+The result shows that mpg is correlative with all other variables, and am is correlative with other varaibles too. So, the am interact with other variables and they should be added into model together.
 ```{r}
 mtcars$am<-factor(mtcars$am)
 fit1<-lm(mpg ~ am, data=mtcars)
-fit2<-lm(mpg ~ gear + am, data=mtcars)
-fit3<-lm(mpg ~ gear + am + drat, data=mtcars)
-fit4<-lm(mpg ~ drat + vs + am + gear, data=mtcars)
-fit9<-lm(mpg ~ disp + hp + drat + wt + qsec + vs + am + gear + carb, data=mtcars)
-fit10<-lm(mpg ~ cyl + disp + hp + drat + wt + qsec + vs + am + gear + carb, data=mtcars)
-anova(fit1,fit2,fit3,fit4,fit9,fit10)
+fitn<-lm(mpg ~ ., data=mtcars)
+anova(fit1,fitn)
 ```
-As result of anova() in appendix Fig-6, Pr(>F) is less than 0.05 except fitn, so it fails to reject the variables adding in model1 to model 5 and adding variable in fitn is rejects for Pr(>F). 
+As result of anova(), Pr(>F) is less than 0.05, and then it fails to reject F-test. So the variables should be added into model.  
 
-Calling plot in Appendix fig7 to checking whether there is outlier.
-```{r,fig.height=7}
- par(mfrow = c(3, 2))
- plot(fit9, which=1)
- plot(fit9, which=2)
- plot(fit9, which=3)
- plot(fit9, which=4)
- plot(fit9, which=5)
- plot(predict(fit9), resid(fit9))
-```
-
-So, we select model fit9.
+Calling plots in Appendix fig-2 to checking whether there is outlier. The plots in Appendix fig-2 show there are some outliers. To find out the outlier records, Calculate cooks.distance.
 ```{r}
-fit<-fit9
-summary(fit)
+summary(cooks.distance(fitn))
+head(sort(round(cooks.distance(fitn),4),decreasing=TRUE),10)
 ```
-Fig-4 in Appendix shows the coefficients. 
-1. For am is a two level factor, am==0 is reference, and the Intercept Estimatesv is the mean of the referenct group am==0 and the other Estimates are the distances of the other groups' means from the reference mean, i.e we expect increase `r round(summary(fit)$coefficients[8],4)`(E(am==1)) in mpg, when am change from 0 to 1, holding all the other variables constant. 
-2. Tests are tests of whether the groups are different than zero. i.e. H0: E(am==1)==0 vs. Ha: E(am==1)<>0 
 
-T-test: H0: E(am==1)==`r round(summary(fit)$coefficients[8],4)` VS Ha: E(am==1)<>0
+So, we delete top 2 outlies and select model fit with all variables
 ```{r}
-pt(-abs(summary(fit)$coefficients[8,3]), fit$df, lower.tail = FALSE)
+m<-mtcars[!row.names(mtcars) %in% c('Merc 230','Ford Pantera L'),]
+fit<-lm(mpg ~ ., data=m)
+summary(fit)$Coefficients
+```
+
+* For am is a two level factor, am==0 is reference, and the Intercept Estimatesv is the mean of the referenct group am==0 and the other Estimates are the distances of the other groups' means from the reference mean, i.e we expect to increase `r round(summary(fit)$coefficients[9],4)`(E(am==1)) in mpg in average, when changing am from 0 to 1 and holding all the other variables. 
+* At the same time, p-values are for tests of whether the groups are different than zero. i.e. H0: beta==0 vs. Ha: beta<>0. In Coefficients table, beta(am==1)'s Pr(>|t|) =`r round(summary(fit)$coefficients[9,4],4)`> 0.05, so we fail to reject H0. i.e. it's possible that the mpg may increase 0 when am change from 0 to 1 and holding other variables.
+
+Cconsider multivariable with interaction, holding other variables with "am" constant, change am from 0 to 1:
+
+   **E[Yi|am = 1,cyl = x2,disp=x3,...]−E[Yi|am=0,cyl=x2,disp=x3...]=β_am+β_cyl*x2+β_disp*x3+...**
+   
+thus the expected change in per unit change in holding all else constant is not constant. We can calculate the T-confidence interval:
+```{r}
+m_am1<-summary(fit)$coefficients[9]
+SE<-summary(fit)$coefficients[9,2]
+t<-summary(fit)$coefficients[9,3]
+m_am1+c(-1,1)*SE*t
+```
+The lower endpoint of T-confidence interval >= 0, so when am change from 0 to 1 and all other variables is held, mpg increase in the interval [`r m_am1+c(-1,1)*SE*t`] with alpha=95%
+
+### Conclusion
+1. Manual transmission is better for MPG than an automatic.
+2. The MPG difference between automatic and manual transmissions is  [`r m_am1+c(-1,1)*SE*t`] with alpha=95%. The increase is not a constant, which relies other variables. 
 
 ### Appendix 
-Fig-1: summary of mtcars
 
-Fig-2: miles per gallon for different Transmission plot
+##### Fig-1: mpg ~ am with condition cyl
+```{r}
+coplot(mpg ~ as.factor(am) | as.factor(cyl), data = mtcars, panel = panel.smooth,row=1)
+par(mfrow = c(2, 2))
+boxplot(mpg~am, data=mtcars,boxwex = 0.5,main="mpg~am")
+boxplot(mpg~am, data=mtcars,boxwex = 0.5,subset=cyl==4, main="mpg~am when cyl==4")
+boxplot(mpg~am, data=mtcars,boxwex = 0.5,subset=cyl==6, main="mpg~am when cyl==6")
+boxplot(mpg~am, data=mtcars,boxwex = 0.5,subset=cyl==8, main="mpg~am when cyl==8")
+```
 
-Fig-3: Cor between mpg and other variables in mtcars
+##### Fig-2: plot to check outlier
+```{r,fig.height=7}
+ par(mfrow = c(3, 2))
+ plot(fitn, which=1)
+ plot(fitn, which=2)
+ plot(fitn, which=3)
+ plot(fitn, which=4)
+ plot(fitn, which=5)
+ plot(predict(fitn), resid(fitn))
+```
 
-Fig-4: summary of fitn, fitted model with all variable
-
-Fig-5: summary of fitn, fitted model with variable am only
-
-Fig-6: analysis of variance (or deviance) tables for 2 fitted model.
-
-Fig-7: residuals versus fitted values plot 
-plot(fit, which=1)
