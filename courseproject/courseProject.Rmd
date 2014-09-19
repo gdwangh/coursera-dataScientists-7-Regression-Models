@@ -17,7 +17,7 @@ In mtcars dataset, the variable am is for the Transmission (0 = automatic, 1 = m
 library(datasets);library(car);data(mtcars)
 str(mtcars)
 ```
-Drawing plots mpg vs.am, shown in appendix fig-1, we can see that the mean of mpg(miles per gallon) for manual Transmission is bigger than mean of automatic, but when considering other variables, the difference is not constant.
+From plots about mpg vs.am shown in appendix fig-1, we can see that the mean of mpg(miles per gallon) for manual transmission is bigger than mean of automatic, but when considering other variables, the difference is not constant.
 
 Calculate the cor() between mpg and am with other variables. 
 ```{r}
@@ -33,12 +33,12 @@ anova(fit1,fitn)
 ```
 Pr(>F) for model 2 is less than 0.05, and thus it fails to reject F-test. So the variables should be added into model and model fitn is selected.  
 
-Drawing the residuals plots for fitn in Appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit. 
+As the residuals plots about fitn in appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit. 
 ```{r}
 summary(fitn)$coefficients
 ```
 
-* For am is a two level factor, am==0 is reference, and the Intercept Estimatesv is the mean of the referenct group(am==0) and the other Estimates are the distances of the other groups' means from the reference mean. We expect to mpg increase `r round(summary(fitn)$coefficients[9],4)`(E(am==1)) in average, when changing am from 0 to 1 and holding all the other variables. 
+* For am is a two level factor, am==0 is reference, and the Intercept Estimatesv is the mean of the referenct group(am==0) and the other Estimates are the distances of the other groups' means from the reference mean. in average, mpg increase `r round(summary(fitn)$coefficients[9],4)`(E(am==1)) , when changing am from 0 to 1 and holding all the other variables. 
 * At the same time, p-values are for tests of whether the groups are different than zero. i.e. H0: beta==0 vs. Ha: beta<>0. In Coefficients table, group(am==1): Pr(>|t|) =`r round(summary(fitn)$coefficients[9,4],4)`> 0.05, so we fail to reject H0. i.e. the mpg may be 0 when changing am from 0 to 1 and holding other variables.
 
 Considering multivariable with interaction, change am from 0 to 1 while holding other variables constant:
@@ -60,23 +60,18 @@ The lower endpoint of T-confidence interval >= 0, so when am change from 0 to 1 
 2. The MPG difference between automatic and manual transmissions is not a constant,  which is in [`r round(m_am1+c(-1,1)*SE*t, 3)`] and relies other variables 
 
 ### Appendix 
-
 #### Fig-1: mpg ~ am with  cyl as condition
 ```{r,fig.height=4,fig.width=5}
+boxplot(mpg~am, data=mtcars,boxwex = 0.3,main="mpg vs. am")
+```
+```{r}
 coplot(mpg ~ as.factor(am) | as.factor(cyl), data = mtcars, panel = panel.smooth,row=1)
 ````
-```{r}
-par(mfrow = c(2, 2))
-boxplot(mpg~am, data=mtcars,boxwex = 0.5,main="mpg vs. am")
-boxplot(mpg~am, data=mtcars,boxwex = 0.5,subset=cyl==4, main="mpg vs. am when cyl==4")
-boxplot(mpg~am, data=mtcars,boxwex = 0.5,subset=cyl==6, main="mpg vs. am when cyl==6")
-boxplot(mpg~am, data=mtcars,boxwex = 0.5,subset=cyl==8, main="mpg vs. am when cyl==8")
-```
 
 #### Fig-2: Residuals plot for fitn
 ```{r,fig.height=4,fig.width=5}
  par(mfrow = c(1, 1))
- plot(fitn)
- plot(predict(fitn), resid(fitn), main="fit vs. Resid")
+ plot(predict(fitn), resid(fitn), main="Resid vs. fit")
  abline(h=0, col="red", lty = 3)
+ plot(fitn)
 ```
