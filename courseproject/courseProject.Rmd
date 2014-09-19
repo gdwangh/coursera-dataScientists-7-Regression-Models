@@ -24,7 +24,7 @@ Calculate the cor() between mpg and am with other variables.
 cor(mtcars$mpg, mtcars[c(2:11)])
 cor(as.numeric(mtcars$am), mtcars[c(2:8,10:11)])
 ```
-The cor result shows that mpg is correlative with all other variables, and am is too. So the am interact with other variables. And they are considered to be added into model together.
+The cor() result shows that mpg is correlative with all other variables, and am is too. So the am interact with other variables. And they are considered to be added into model together.
 ```{r}
 mtcars$am<-factor(mtcars$am)
 fit1<-lm(mpg ~ am, data=mtcars)
@@ -33,7 +33,7 @@ anova(fit1,fitn)
 ```
 Pr(>F) for model 2 is less than 0.05, and thus it fails to reject F-test. So the variables should be added into model and model fitn is selected.  
 
-Drawing the residuals plots for fitn in Appendix fig-2, it seems none of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit. 
+Drawing the residuals plots for fitn in Appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit. 
 ```{r}
 summary(fitn)$coefficients
 ```
@@ -62,8 +62,10 @@ The lower endpoint of T-confidence interval >= 0, so when am change from 0 to 1 
 ### Appendix 
 
 #### Fig-1: mpg ~ am with  cyl as condition
-```{r}
+```{r,fig.height=4,fig.width=5}
 coplot(mpg ~ as.factor(am) | as.factor(cyl), data = mtcars, panel = panel.smooth,row=1)
+````
+```{r}
 par(mfrow = c(2, 2))
 boxplot(mpg~am, data=mtcars,boxwex = 0.5,main="mpg vs. am")
 boxplot(mpg~am, data=mtcars,boxwex = 0.5,subset=cyl==4, main="mpg vs. am when cyl==4")
@@ -72,13 +74,9 @@ boxplot(mpg~am, data=mtcars,boxwex = 0.5,subset=cyl==8, main="mpg vs. am when cy
 ```
 
 #### Fig-2: Residuals plot for fitn
-```{r,fig.height=7}
- par(mfrow = c(3, 2))
- plot(fitn, which=1)
- plot(fitn, which=2)
- plot(fitn, which=3)
- plot(fitn, which=4)
- plot(fitn, which=5)
+```{r,fig.height=4,fig.width=5}
+ par(mfrow = c(1, 1))
+ plot(fitn)
  plot(predict(fitn), resid(fitn), main="fit vs. Resid")
  abline(h=0, col="red", lty = 3)
 ```
