@@ -1,7 +1,7 @@
 ---
-title: "Is an automatic or manual transmission better for MPG"
-author: "wangh"
-date: "Saturday, September 13, 2014"
+title: "Which transmission better for MPG"
+author: 
+date: 
 output: html_document
 ---
 ### Synopsis
@@ -71,7 +71,8 @@ coplot(mpg ~ as.factor(am) | as.factor(cyl), data = mtcars, panel = panel.smooth
 #### Fig-2: Residuals plot for fitn
 ```{r,fig.height=4,fig.width=5}
  par(mfrow = c(1, 1))
- plot(predict(fitn), resid(fitn), main="Resid vs. fit")
+ rng<-round(c(-1,1)*max(abs(range(resid(fitn)))), 0)
+ plot(predict(fitn), resid(fitn), main="Resid vs. fit", ylim=rng)
  abline(h=0, col="red", lty = 3)
  plot(fitn)
 ```
