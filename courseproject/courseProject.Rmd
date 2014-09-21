@@ -28,13 +28,20 @@ The cor() result shows that mpg is correlative with all other variables, and am 
 ```{r}
 mtcars$am<-factor(mtcars$am)
 fit1<-lm(mpg ~ am, data=mtcars)
-fitn<-lm(mpg ~ ., data=mtcars)
-anova(fit1,fitn)
+fitn1<-lm(mpg ~ ., data=mtcars)
+anova(fit1,fitn1)
 ```
 Pr(>F) for model 2 is less than 0.05, and thus it fails to reject F-test. So the variables should be added into model and model fitn is selected.  
 
-As the residuals plots about fitn in appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit. 
+As the residuals plots about fitn in appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit.
+But it seems there are outliers. Omit the oulier and redraw the plots shown in appendix fig-3 and item seems better a litter.
 ```{r}
+op<-which(row.names(mtcars)=="Ford Pantera L")
+fitn2<-lm(mpg ~ ., data=mtcars[-op,])
+```
+select fitn2 as model and check it's coefficient:
+```{r}
+fitn<-fitn2
 summary(fitn)$coefficients
 ```
 
@@ -68,11 +75,28 @@ boxplot(mpg~am, data=mtcars,boxwex = 0.3,main="mpg vs. am")
 coplot(mpg ~ as.factor(am) | as.factor(cyl), data = mtcars, panel = panel.smooth,row=1)
 ````
 
-#### Fig-2: Residuals plot for fitn
+#### Fig-2: Residuals plot for fitn1
 ```{r,fig.height=4,fig.width=5}
  par(mfrow = c(1, 1))
- rng<-round(c(-1,1)*max(abs(range(resid(fitn)))), 0)
- plot(predict(fitn), resid(fitn), main="Resid vs. fit", ylim=rng)
+ rng<-round(c(-1,1)*max(abs(range(resid(fitn1)))), 0)
+ plot(predict(fitn1), resid(fitn1), main="Resid vs. fit", ylim=rng)
  abline(h=0, col="red", lty = 3)
- plot(fitn)
+ abline(h=4, col="red", lty = 3)
+ abline(h=-4, col="red", lty = 3)
+```
+```{r,fig.height=8,fig.width=10}
+ par(mfrow = c(2, 2)); plot(fitn1)
+```
+
+#### Fig-3: Residuals plot for fitn2 after omitting
+```{r,fig.height=4,fig.width=5}
+ par(mfrow = c(1, 1))
+ rng<-round(c(-1,1)*max(abs(range(resid(fitn2)))), 0)
+ plot(predict(fitn2), resid(fitn2), main="Resid vs. fit", ylim=rng)
+ abline(h=0, col="red", lty = 3)
+ abline(h=4, col="red", lty = 3)
+ abline(h=-4, col="red", lty = 3)
+```
+```{r,fig.height=8,fig.width=10}
+ par(mfrow = c(2, 2)); plot(fitn2)
 ```
