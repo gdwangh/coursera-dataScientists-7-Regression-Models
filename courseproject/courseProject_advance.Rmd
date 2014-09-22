@@ -38,13 +38,32 @@ vif() bigger than 10 is cyl, ommit the cyl.
 ```{r}
 fit8<-lm(mpg~hp+drat+wt+qsec+vs+am+gear+carb, data=mtcars);vif(fit8)
 ```
-Check and select the model
+vif() bigger than 5 is hp, ommit the hp.
 ```{r}
-anova(fit1,fit8, fit9,fitall)
+fit7<-lm(mpg~drat+wt+qsec+vs+am+gear+carb, data=mtcars);vif(fit7)
 ```
+vif() bigger than 5 is wt, ommit the wt.
+```{r}
+fit6<-lm(mpg~drat+qsec+vs+am+gear+carb, data=mtcars);vif(fit6)
+anova(fit1,fit6,fit7, fit8, fit9,fitall)
+```
+So, wt shouldn't be omitted. omit gear.
+```{r}
+fit6<-lm(mpg~drat+wt+qsec+vs+am+carb, data=mtcars);vif(fit6)
+anova(fit1,fit6,fit7, fit8, fit9,fitall)
+```
+omit qsec
+```{r}
+fit5<-lm(mpg~drat+wt+vs+am+carb, data=mtcars);vif(fit5)
+anova(fit1,fit5,fit6,fit7, fit8, fit9,fitall)
+```
+
+
+fit5 is selected.
+
 Pr(>F) for model 2 is less than 0.05, and thus it fails to reject F-test. So the variables should be added into model and model fit8 is selected.  
 ```{r}
-fitn<-lm(mpg~am+hp+drat+wt+qsec+vs+gear+carb, data=mtcars)
+fitn<-lm(mpg~am+drat+wt+vs+carb, data=mtcars)
 ```
 
 As the residuals plots about fitn in appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit.
