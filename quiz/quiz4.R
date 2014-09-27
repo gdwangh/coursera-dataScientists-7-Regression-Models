@@ -35,6 +35,17 @@ data(InsectSprays)
 glm1 <- glm(count~spray,family="poisson",data=InsectSprays)
 1/exp(glm1$coeff)
 
+# Q5
+t<-0:100
+t2<-log(10)+t
+count<-dpois(t*1000, lambda=3)
+x<-sample(c(0,1), size=101, replace=TRUE)
+df<-cbind(t,t2,x,count)
+g1<-glm(count ~ x + offset(t), family = poisson)
+g2<-glm(count ~ x + offset(t2), family = poisson)
+g1$coeff
+g2$coeff
+
 # Q6
 x <- -5:5
 y <- c(5.12, 3.93, 2.67, 1.87, 0.52, 0.08, 0.93, 2.05, 2.54, 3.87, 4.97)
