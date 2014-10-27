@@ -22,40 +22,48 @@ From plots about mpg vs.am shown in appendix fig-1, we can see that the mean of 
 ```{r}
 mtcars$am<-factor(mtcars$am)
 fit1<-lm(mpg ~ ., data=mtcars)
-summary(fit1)
+summary(fit1)$coefficients
+summary(fit1)$adj.r.squared
 ```
 Some p-value are bigger than 0.05, delete the variables whose p-value is biggest. Repeat the step until the all p-values are smaller than 0.05
 ```{r}
 # Adjusted R-squared:  0.8066, delete cyl whose p-value is biggest
 fit2<-lm(mpg ~ am + disp + hp + drat + wt + qsec + vs + gear + carb, data=mtcars)
-summary(fit2)
+summary(fit2)$coefficients
+summary(fit2)$adj.r.squared
 
 # Adjusted R-squared:  0.8153, delete vs whose p-value is biggest
 fit3<-lm(mpg ~ am + disp + hp + drat + wt + qsec + gear + carb, data=mtcars)
-summary(fit3)
+summary(fit3)$coefficients
+summary(fit3)$adj.r.squared
 
 # Adjusted R-squared:  0.823, delete carb whose p-value is biggest
 fit4<-lm(mpg ~ am + disp + hp + drat + wt + qsec + gear, data=mtcars)
-summary(fit4)
+summary(fit4)$coefficients
+summary(fit4)$adj.r.squared
 
 # Adjusted R-squared:  0.8296 , delete gear whose p-value is biggest
 fit5<-lm(mpg ~ am + disp + hp + drat + wt + qsec, data=mtcars)
-summary(fit5)
+summary(fit5)$coefficients
+summary(fit5)$adj.r.squared
 
 # Adjusted R-squared:  0.8347,  delete drat whose p-value is biggest
-fit5<-lm(mpg ~ am + disp + hp + wt + qsec, data=mtcars)
-summary(fit5)
+fit6<-lm(mpg ~ am + disp + hp + wt + qsec, data=mtcars)
+summary(fit6)$coefficients
+summary(fit6)$adj.r.squared
 
 # Adjusted R-squared:  0.8375, delete disp whose p-value is biggest
-fit6<-lm(mpg ~ am + hp + wt + qsec, data=mtcars)
-summary(fit6)
+fit7<-lm(mpg ~ am + hp + wt + qsec, data=mtcars)
+summary(fit7)$coefficients
+summary(fit7)$adj.r.squared
 
 # Adjusted R-squared:  0.8368, delete hp whose p-value is biggest
-fit7<-lm(mpg ~ am + wt + qsec, data=mtcars)
-summary(fit7)
+fit8<-lm(mpg ~ am + wt + qsec, data=mtcars)
+summary(fit8)$coefficients
+summary(fit8)$adj.r.squared
 ```
 
-all Pr(>F) for model fit7 are less than 0.05 and so model fit7 is selected.  
+all Pr(>F) for model fit8 are less than 0.05 and adjust R-squared stop to increase, so model fit8 is selected.  
 ```{r}
 fitn<-lm(mpg~am + wt + qsec, data=mtcars)
 ```
