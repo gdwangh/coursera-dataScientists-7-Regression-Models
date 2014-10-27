@@ -28,11 +28,11 @@ The cor() result shows that mpg is correlative with all other variables, and am 
 ```{r}
 mtcars$am<-factor(mtcars$am)
 fit1<-lm(mpg ~ am, data=mtcars)
-fitall<-lm(mpg ~ ., data=mtcars);vif(fitall)
+fitall<-lm(mpg ~ ., data=mtcars);vif(fitall);summary(fitall)
 ```
 vif() bigger than 10 is cyl, disp and wt. ommit the disp for  whose vif is bigger than 10 and is the highest one.
 ```{r}
-fit9<-lm(mpg~cyl+hp+drat+wt+qsec+vs+am+gear+carb, data=mtcars);vif(fit9)
+fit9<-lm(mpg~cyl+hp+drat+wt+qsec+vs+am+gear+carb, data=mtcars);vif(fit9);summary(fit9)
 ```
 vif() bigger than 10 is cyl, ommit the cyl.
 ```{r}
@@ -58,15 +58,14 @@ fit5<-lm(mpg~drat+wt+vs+am+carb, data=mtcars);vif(fit5)
 anova(fit1,fit5,fit6,fit7, fit8, fit9,fitall)
 ```
 
-
-fit5 is selected.
+fit5 is selected. And fit5's R^2 is larger than 0.8 and it not bad.
 
 Pr(>F) for model 2 is less than 0.05, and thus it fails to reject F-test. So the variables should be added into model and model fit8 is selected.  
 ```{r}
 fitn<-lm(mpg~am+drat+wt+vs+carb, data=mtcars)
 ```
 
-As the residuals plots about fitn in appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit.
+As the residuals plots about fitn in appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit and normality.
 
 ```{r}
 summary(fitn)$coefficients
