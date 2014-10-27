@@ -1,0 +1,110 @@
+---
+title: "Which transmission better for MPG"
+author: 
+date: 
+output: html_document
+---
+  ### Synopsis
+  In this document, we will answer 2 questions below by taking mtcars dataset and using regression models and exploratory data analyses: 
+  
+  1. Is an automatic or manual transmission better for MPG
+2. Quantify the MPG difference between automatic and manual transmissions
+
+### Data Processing
+
+In mtcars dataset, the variable am is for the Transmission (0 = automatic, 1 = manual). 
+```{r}
+library(datasets);library(car);data(mtcars)
+str(mtcars)
+```
+From plots about mpg vs.am shown in appendix fig-1, we can see that the mean of mpg(miles per gallon) for manual transmission is bigger than mean of automatic, but when considering other variables, the difference is not constant.
+
+```{r}
+mtcars$am<-factor(mtcars$am)
+fit1<-lm(mpg ~ ., data=mtcars)
+summary(fit1)
+```
+Some p-value are bigger than 0.05, delete the variables whose p-value is biggest. Repeat the step until the all p-values are smaller than 0.05
+```{r}
+# Adjusted R-squared:  0.8066, delete cyl whose p-value is biggest
+fit2<-lm(mpg ~ am + disp + hp + drat + wt + qsec + vs + gear + carb, data=mtcars)
+summary(fit2)
+
+# Adjusted R-squared:  0.8153, delete vs whose p-value is biggest
+fit3<-lm(mpg ~ am + disp + hp + drat + wt + qsec + gear + carb, data=mtcars)
+summary(fit3)
+
+# Adjusted R-squared:  0.823, delete carb whose p-value is biggest
+fit4<-lm(mpg ~ am + disp + hp + drat + wt + qsec + gear, data=mtcars)
+summary(fit4)
+
+# Adjusted R-squared:  0.8296 , delete gear whose p-value is biggest
+fit5<-lm(mpg ~ am + disp + hp + drat + wt + qsec, data=mtcars)
+summary(fit5)
+
+# Adjusted R-squared:  0.8347,  delete drat whose p-value is biggest
+fit5<-lm(mpg ~ am + disp + hp + wt + qsec, data=mtcars)
+summary(fit5)
+
+# Adjusted R-squared:  0.8375, delete disp whose p-value is biggest
+fit6<-lm(mpg ~ am + hp + wt + qsec, data=mtcars)
+summary(fit6)
+
+# Adjusted R-squared:  0.8368, delete hp whose p-value is biggest
+fit7<-lm(mpg ~ am + wt + qsec, data=mtcars)
+summary(fit7)
+```
+
+all Pr(>F) for model fit7 are less than 0.05 and so model fit7 is selected.  
+```{r}
+fitn<-lm(mpg~am + wt + qsec, data=mtcars)
+```
+
+As the residuals plots about fitn in appendix fig-2, there is any of the patterned appearance. The residuals were independently and (almost) identically distributed with zero mean, and were uncorrelated with the fit and normality.
+
+```{r}
+summary(fitn)$coefficients
+```
+
+* For am is a two level factor, am==0 is reference, and the Intercept Estimatesv is the mean of the referenct group(am==0) and the other Estimates are the distances of the other groups' means from the reference mean. in average, mpg increase `r round(summary(fitn)$coefficients[2],4)`(E(am==1)) , when changing am from 0 to 1 and holding all the other variables. 
+* At the same time, p-values are for tests of whether the groups are different than zero. i.e. H0: beta==0 vs. Ha: beta<>0. In Coefficients table, group(am==1): Pr(>|t|) =`r round(summary(fitn)$coefficients[2,4],4)`<0.05, so we reject H0. i.e. the mpg may be <> 0 when changing am from 0 to 1 and holding other variables.
+
+Considering multivariable with interaction, change am from 0 to 1 while holding other variables constant:
+
+**E[mpgi|am=1,wt=x2,qsec=x3]-[mpgi|am=0,wt=x2,qsec=x3...]=beta_am+beta_wt*x2+beta_qsec*x3**
+
+thus the expected change in per unit change in holding all else constant is not constant. 
+Consider t test: **H0:bata_am=`r summary(fitn)$coefficients[2]` vs. Ha:btat_am<>`r summary(fitn)$coefficients[2]`**, calculate the T-confidence interval:
+```{r}
+m_am1<-summary(fitn)$coefficients[2]
+SE<-summary(fitn)$coefficients[2,2]
+t<-summary(fitn)$coefficients[2,3]
+m_am1+c(-1,1)*SE*t
+```
+The lower endpoint of T-confidence interval >= 0, so when am change from 0 to 1 and all other variables is held, mpg increase in the interval [`r round(m_am1+c(-1,1)*SE*t,3) `]
+
+### Conclusion
+1. Manual transmission is better for MPG than an automatic.
+2. The MPG difference between automatic and manual transmissions is not a constant,  which is in [`r round(m_am1+c(-1,1)*SE*t, 3)`] and relies other variables 
+
+### Appendix 
+#### Fig-1: mpg ~ am with  cyl as condition
+```{r,fig.height=4,fig.width=5}
+boxplot(mpg~am, data=mtcars,boxwex = 0.3,main="mpg vs. am")
+```
+```{r}
+coplot(mpg ~ as.factor(am) | as.factor(cyl), data = mtcars, panel = panel.smooth,row=1)
+```
+
+#### Fig-2: Residuals plot for fitn1
+```{r,fig.height=4,fig.width=5}
+par(mfrow = c(1, 1))
+rng<-round(c(-1,1)*max(abs(range(resid(fitn)))), 0)
+plot(predict(fitn), resid(fitn), main="Resid vs. fit", ylim=rng)
+abline(h=0, col="red", lty = 3)
+abline(h=4, col="red", lty = 3)
+abline(h=-4, col="red", lty = 3)
+```
+```{r,fig.height=8,fig.width=10}
+par(mfrow = c(2, 2)); plot(fitn)
+```
