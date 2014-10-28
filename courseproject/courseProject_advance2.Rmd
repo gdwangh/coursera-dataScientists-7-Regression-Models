@@ -63,7 +63,7 @@ summary(fit8)$coefficients
 summary(fit8)$adj.r.squared
 ```
 
-all Pr(>F) for model fit8 are less than 0.05 and adjust R-squared stop to increase, so model fit8 is selected.  
+all Pr(>F) for model fit8 are less than 0.05 , so model fit8 is selected.  
 ```{r}
 fitn<-lm(mpg~am + wt + qsec, data=mtcars)
 ```
